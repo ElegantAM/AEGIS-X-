@@ -4,31 +4,29 @@ from flask_cors import CORS
 from openai import OpenAI
 
 app = Flask(__name__)
-# Enable CORS for all routes to allow your frontend to communicate with this backend
 CORS(app)
 
-# Initialize OpenAI client with Groq API key from environment variables
+# Initialize OpenAI client using the environment variable
 client = OpenAI(
     api_key=os.environ.get("GROQ_API_KEY"),
     base_url="https://api.groq.com/openai/v1"
 )
 
-# 1. Added a root route to prevent 405 errors when visiting the base URL
+# This route handles the root URL for browser GET requests
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({"status": "success", "message": "Aegis Backend is live and running!"}), 200
+    return jsonify({"status": "online", "message": "Aegis Backend is ready."}), 200
 
-# 2. Main processing route
+# This route handles the POST requests for your logic
 @app.route("/submit", methods=["POST"])
 def process_assessment():
     try:
         data = request.get_json()
         if not data or 'problem' not in data:
-            return jsonify({"error": "No 'problem' field found in request"}), 400
+            return jsonify({"error": "Missing 'problem' field in JSON body"}), 400
             
         user_issue = data['problem']
         
-        # Chat completion logic
         chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "You are a legal compliance engineer."},
@@ -44,6 +42,7 @@ def process_assessment():
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
