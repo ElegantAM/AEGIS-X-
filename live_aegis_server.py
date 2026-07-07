@@ -4,23 +4,27 @@ from flask_cors import CORS
 from openai import OpenAI
 
 app = Flask(__name__)
-# Enable CORS to ensure your frontend can communicate with the backend
-CORS(app)
 
-# Initialize the OpenAI client
+# Configure CORS to allow cross-origin requests
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Initialize the client
 client = OpenAI(
-    api_key=os.environ.get("GROQ_API_KEY"),
+    api_key=os.environ.get("GROQ_API_KEY"), 
     base_url="https://api.groq.com/openai/v1"
 )
 
-# FIX: This route handles the root URL when you visit in a browser (GET request)
+# Root route for health checks
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"status": "active", "message": "Aegis Backend is live."}), 200
 
-# This route handles the actual data submission (POST request)
-@app.route("/submit", methods=["POST"])
+# Submit route with explicit OPTIONS handling for CORS
+@app.route("/submit", methods=["POST", "OPTIONS"])
 def process_assessment():
+    if request.method == "OPTIONS":
+        return '', 200
+    
     try:
         data = request.get_json()
         if not data or 'problem' not in data:
@@ -43,6 +47,7 @@ def process_assessment():
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
