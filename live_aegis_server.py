@@ -1,4 +1,5 @@
 import os
+import traceback  # 1. Added for debugging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
@@ -19,7 +20,7 @@ client = OpenAI(
 def home():
     return jsonify({"status": "active", "message": "Aegis Backend is live."}), 200
 
-# Submit route with explicit OPTIONS handling for CORS
+# Submit route with error tracking
 @app.route("/submit", methods=["POST", "OPTIONS"])
 def process_assessment():
     if request.method == "OPTIONS":
@@ -43,10 +44,14 @@ def process_assessment():
         return jsonify({"analysis": chat_completion.choices[0].message.content}), 200
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # 2. This will print the full technical error to your Render logs
+        print("--- SERVER ERROR DETECTED ---")
+        print(traceback.format_exc())
+        return jsonify({"error": "Internal Server Error. Please check logs."}), 500
 
 if __name__ == "__main__":
     app.run()
+
 
 
 
