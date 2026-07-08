@@ -50,7 +50,10 @@ def process_assessment():
         return jsonify({"error": "Internal Server Error. Please check logs."}), 500
 
 if __name__ == "__main__":
-    app.run()
+    # Render provides the port in an environment variable
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
 
 
 
